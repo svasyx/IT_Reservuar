@@ -1,0 +1,68 @@
+int HighLevelPin = 4;					//Пін датчика реле високого рівня
+int LowLevelPin = 2;					//Пін датчика реле низького рівня
+int pumpPin = 13;						//Пін контактора-реле увімкнення насосу
+int lastButtonState = LOW;				//Останнє положення датчика виского рівня
+unsigned long buttonPressStartTime = 0; //Час спрацювання реле високого рівня
+
+
+
+
+void setup()
+{
+  //Встановлення пінів в заданий режим
+  pinMode(HighLevelPin, INPUT);	
+  pinMode(LowLevelPin, INPUT);
+  pinMode(pumpPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+   //Об'явлення змінних таймера
+   bool buttonState = digitalRead(HighLevelPin);
+   unsigned long elapsedTime = 0;
+  
+  //Зчитування значення датчика реле низького рівня
+  //Якщо маємо високий рівень сигналу - вимикаємо насос
+  if(digitalRead(LowLevelPin) == HIGH)
+   {
+    digitalWrite(pumpPin, LOW);
+    
+  }
+  
+  //Логіка таймеру, рахуємо час з моменту спрацювання реле
+  if (buttonState == HIGH && lastButtonState == LOW) {
+    buttonPressStartTime = millis(); 
+  }
+
+  //Цикл за принципом затримки увімкнення
+ while((digitalRead(HighLevelPin) == HIGH))
+  { 
+   elapsedTime = millis() - buttonPressStartTime; 
+   
+//Якщо реле увімкнене вже 3 секуди то передаємо
+//в функцію дозвіл на пуск насосу
+//після відпрацювання чистимо таймер та виходимо з циклу
+   
+   	 
+   
+      if((elapsedTime >= 3000))     
+      {
+        elapsedTime = 0;
+        MakePumpWork(HighLevelPin,true);
+           
+      }
+    };
+  
+
+}
+
+void MakePumpWork(int HighLevelPin, bool allowLaucnh)
+{
+    if(allowLaucnh == true)
+   {
+     digitalWrite(pumpPin, HIGH);
+     return;
+   }
+}
+
